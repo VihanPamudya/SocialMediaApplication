@@ -6,6 +6,7 @@ import com.socialmedia.service.ICommentService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -21,7 +22,14 @@ public class CommentController {
 
     @GetMapping("/post/{postId}")
     public ResponseEntity<List<CommentResponse>> getCommentsByPostId(@PathVariable Long postId) {
-        return ResponseEntity.ok(commentService.getCommentsByPostId(postId));
+        try {
+            List<CommentResponse> comments = commentService.getCommentsByPostId(postId);
+            return new ResponseEntity<>(comments, HttpStatus.OK);
+        } catch (ResponseStatusException ex) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping("/{id}")
@@ -31,19 +39,39 @@ public class CommentController {
 
     @PostMapping("/create")
     public ResponseEntity<CommentResponse> createComment(@RequestBody CommentRequest commentRequest) {
-        return new ResponseEntity<>(commentService.createComment(commentRequest), HttpStatus.CREATED);
+        try {
+            CommentResponse createdComment = commentService.createComment(commentRequest);
+            return new ResponseEntity<>(createdComment, HttpStatus.CREATED);
+        } catch (ResponseStatusException ex) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<CommentResponse> updateComment(
             @PathVariable Long id,
             @RequestBody CommentRequest commentRequest) {
-        return ResponseEntity.ok(commentService.updateComment(id, commentRequest));
+        try {
+            CommentResponse updatedComment = commentService.updateComment(id, commentRequest);
+            return new ResponseEntity<>(updatedComment, HttpStatus.OK);
+        } catch (ResponseStatusException ex) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteComment(@PathVariable Long id) {
-        commentService.deleteComment(id);
-        return ResponseEntity.noContent().build();
+        try {
+            commentService.deleteComment(id);
+            return ResponseEntity.noContent().build();
+        } catch (ResponseStatusException ex) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (Exception ex) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

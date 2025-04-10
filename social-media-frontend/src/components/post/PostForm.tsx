@@ -10,7 +10,7 @@ const PostForm: React.FC<PostFormProps> = ({ onClose }) => {
   const { addPost } = useContext(PostContext);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [titleColor, setTitleColor] = useState('#1976d2'); // Default blue color
+  const [titleColor, setTitleColor] = useState('#1976d2');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

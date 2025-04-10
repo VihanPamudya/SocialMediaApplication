@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect, ReactNode } from 'react';
 import { Post, Comment } from '../types';
-import { fetchPosts, createPost, createComment, fetchPostById } from '../services/api';
+import { fetchPosts, createPost, createComment, fetchPostById, deletePost } from '../services/api';
 
 interface PostContextType {
   posts: Post[];
@@ -9,6 +9,7 @@ interface PostContextType {
   addPost: (post: Omit<Post, 'id' | 'createdAt' | 'comments'>) => Promise<Post>;
   addComment: (comment: Omit<Comment, 'id' | 'createdAt'>) => Promise<void>;
   getPostById: (id: number) => Promise<Post | undefined>;
+  deletePostById: (id: number) => Promise<void>;
 }
 
 export const PostContext = createContext<PostContextType>({
@@ -22,6 +23,9 @@ export const PostContext = createContext<PostContextType>({
     throw new Error('Not implemented');
   },
   getPostById: async () => {
+    return undefined;
+  },
+  deletePostById: async () => {
     return undefined;
   },
 });
@@ -80,11 +84,10 @@ export const PostProvider: React.FC<PostProviderProps> = ({ children }) => {
 
   const getPostById = async (id: number): Promise<Post | undefined> => {
     try {
-      // First check if we already have the post in state
       const existingPost = posts.find((post) => post.id === id);
-      if (existingPost) return existingPost;
-
-      // If not, fetch it from the API
+      if (existingPost){
+        return existingPost;
+      } 
       const post = await fetchPostById(id);
       return post;
     } catch (error) {
@@ -93,8 +96,18 @@ export const PostProvider: React.FC<PostProviderProps> = ({ children }) => {
     }
   };
 
+  const deletePostById = async (postId: number): Promise<void> => {
+    try {
+      await deletePost(postId);
+      setPosts((prevPosts) => prevPosts.filter((post) => post.id !== postId));
+    } catch (error) {
+      setError('Failed to delete post');
+      throw error;
+    }
+  };
+
   return (
-    <PostContext.Provider value={{ posts, loading, error, addPost, addComment, getPostById }}>
+    <PostContext.Provider value={{ posts, loading, error, addPost, addComment, getPostById, deletePostById }}>
     {children}
   </PostContext.Provider>
   );

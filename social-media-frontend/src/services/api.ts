@@ -67,7 +67,6 @@ export const deletePost = async (id: number): Promise<void> => {
   }
 };
 
-// Comment API calls
 export const fetchCommentsByPostId = async (postId: number): Promise<Comment[]> => {
   try {
     const response = await api.get(`/comments/post/${postId}`);
@@ -81,8 +80,12 @@ export const fetchCommentsByPostId = async (postId: number): Promise<Comment[]> 
 };
 
 export const createComment = async (comment: Omit<Comment, 'id' | 'createdAt'>): Promise<Comment> => {
+  if (!comment.postId) {
+    throw new Error('Post ID is required to create a comment');
+  }
+  
   try {
-    const response = await api.post('/comments', comment);
+    const response = await api.post('/comments/create', comment);
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {

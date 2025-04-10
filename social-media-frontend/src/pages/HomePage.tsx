@@ -8,7 +8,6 @@ const HomePage = () => {
 
   return (
     <div className="home-page">
-      <h1>Home</h1>
       <button 
         className="create-post-button" 
         onClick={() => setIsPostModalOpen(true)}
